@@ -9,7 +9,7 @@ fm = Formatter()
 
 # read in csv, create objects, and save to list
 objects = []
-path = Path(__file__).parent / "../cupcakes.csv"
+path = Path(__file__).parent / "../cupcakes_keywords.csv"
 with path.open() as csvf:
     csv_reader = reader(csvf)
     for row in csv_reader:
@@ -18,12 +18,12 @@ with path.open() as csvf:
         obj["yield"] = row[1]
         obj["ingredients"] = ast.literal_eval(row[2])
         obj["steps"] = ast.literal_eval(row[3])
-        obj["tags"] = ast.literal_eval(row[5])
+        obj["keywords"] = ast.literal_eval(row[8])
         fm.run(obj) # format
         objects.append(fm.getString()) #and append formatted obj
 csvf.close()
 
-with open('formatted_recipes.txt', mode='w') as recipe_file:
+with open('formatted_recipes_with_keywords.txt', mode='w') as recipe_file:
     for recipe in objects:
         # write formatted to file
         recipe_file.write(recipe)
