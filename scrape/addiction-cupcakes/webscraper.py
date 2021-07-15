@@ -34,16 +34,15 @@ class AddictionParser ():
         pattern = re.compile("|".join(rep.keys()))
         return pattern.sub(lambda m: rep[re.escape(m.group(0))], text).strip()
 
-    def parseTags (self, html):
-     
+    def parseTags (self):
+        html = self.soup.find("div", {"id" : re.compile('^post-')})
         prefixes=("category", "tag") # these are our tag classes
         list = html["class"]
         tags = [x for x in list if x.startswith(prefixes)]
         # now tags only has category- and tag- classes
         for index, tag in enumerate(tags):
             tags[index] = self.isolateTag(tag)
-
-        return tags
+        self.tags = tags
       
     
     def parseTitle (self):
@@ -62,50 +61,99 @@ class AddictionParser ():
         return True
     
     
+    def processHeading (self, text):
+        text = text.strip().lower()
+        if "cupcakes" in text or "batter" in text or "cake" in text:
+            return "main"
+        if "filling" in text:
+            return "filling"
+        if "frosting" in text or "buttercream" in text or "glaze" in text or "icing" in text:
+            return "frosting"
+        if "crust" in text:
+            return "crust"
+        if "ganache" in text:
+            return "ganache"
+        if "topping" in text or "decoration" in text or "decorating" in text:
+            return "topping"
+        if "curd" in text:
+            return "curd"
+        if "syrup" in text:
+            return "syrup"
+        text = re.sub(r"[^a-zA-Z0-9]+", ' ', text)
+        text = re.sub(r'(for the ).*[.]', '', text)
+        return text.strip().replace(" ", "_")
+    
+    
+    def parseHeadings (self):
+        list = self.soup.select(".mv-create-ingredients h3")
+        headings = [self.processHeading(item.text) for item in list]
+        return headings;
+        
+    def processIngredient (self, text):
+         text = re.sub(r'\([^)]*\)', ' ', text) # get rid of parentheticals (items within parens and parens)
+         text = re.sub(r"[^a-zA-Z0-9/().]+", ' ', text) # get rid of special characters
+         return text;
+    
+    
+    def parseIngredientList (self, uls):
+        processed = []
+        for ul in uls:
+            items = [ self.processIngredient(li.text) for li in ul.findAll('li')]
+            processed.append(items)
+        return processed
+        
+        
+        
+    
     def parseIngredients (self):
         
         if self.soup.find("div", {"class" : "mv-create-ingredients"}) == None and self.soup.find("div", {"class" : "ingredients"}) == None:
                 return False
+                
+        ingredients_list = self.soup.select(".mv-create-ingredients ul")
+        body = self.parseIngredientList(ingredients_list)
+       
         
-        if self.soup.find("div", {"class" : "mv-create-ingredients"}) != None:
-            list = self.soup.select(".mv-create-ingredients li")
-            if len(list) == 0:
-                list = self.soup.select(".mv-create-ingredients p")
-                if len(list) == 0:
-                    list = self.soup.select(".mv-create-ingrediets div")
-                    
-        elif self.soup.find("div", {"class" : "ingredients"}) != None:
-            list = self.soup.select(".ingredients li")
-            if len(list) == 0:
-                list = self.soup.select(".ingredients li")
-                if len(list) == 0:
-                    list = self.soup.select(".ingredients p")
-                    if len(list) == 0:
-                        list = self.soup.select(".ingredients div")
+        if len(body) <= 0:
+            return False;
             
+        if len(body) == 1:
+            self.ingredients = [{"main" : body}]
+            return True;
+        
+        # more than 1 subrecipe
+        
+        # get headings
+        headings = self.parseHeadings();
+        if len(headings) != len(body):
+            return False;
         
         ingredients = []
-        for item in list:
-            ingredient_object = {}
-            if item.find("span"):
-                if item.find("span").has_attr('data-amount'):
-                    ingredient_object["amount"] = item.find("span")["data-amount"]
-                if item.find("span").has_attr('data-unit'):
-                    ingredient_object["unit"] = item.find("span")["data-unit"]
-                    
-            text = re.sub(r'\([^)]*\)', ' ', item.text) # get rid of parentheticals (items within parens and parens)
-            ingredient_object["text"] = re.sub(r"[^a-zA-Z0-9/().]+", ' ', text) # get rid of special characters
-            ingredients.append(ingredient_object)
+        for i in range(len(body)):
+            ingredients.append({headings[i]: body[i]})
             
         self.ingredients = ingredients
-        
         return True
     
+    
+    def tokenize_sentences (self, array):
+        text = " ".join(array)
+        text = re.sub(r"[^a-zA-Z0-9/().]+", ' ', text) # get rid of special characters
+        text = re.sub(r'\([^)]*\)', '', text) #get rid of parentheticals (items within parens and parens)
+        text = re.sub(r'[^^](I ).*[.]', '', text) #get rid of asides (e.g., I recomend)
+        text = re.sub(r'[^^](Watch my ).*[.]', '', text) #get rid of asides (e.g., I recomend)
+        text = re.sub(r'[^^](Watch video ).*[.]', '', text) #get rid of asides (e.g., I recomend)
+        text = text.strip()
+        steps = []
+        list = nltk.tokenize.sent_tokenize(text)
+        for sentence in list:
+            steps.append(sentence)
+        return steps
+        
     def parseSteps (self):
         
         if self.soup.find("div", {"class" : "mv-create-instructions"}) == None and self.soup.find("div", {"class" : "instructions"}) == None:
                 return False
-                
                 
         if self.soup.find("div", {"class" : "mv-create-instructions"}) != None:
             list = self.soup.select(".mv-create-instructions li")
@@ -123,18 +171,8 @@ class AddictionParser ():
                     if len(list) == 0:
                         list = self.soup.select(".instructions div")
         
-        steps = []
-        # remove strong tags to keep instructions just instructions
-        # separate steps based on sentences
-        for item in list:
-            text = re.sub("^[0-9].|^\n|^\n1.", "", item.text) #remove step number
-            text = re.sub(r"[^a-zA-Z0-9.,()]+", ' ',text)
-            text = text.strip()
-            list = nltk.tokenize.sent_tokenize(text)
-            for sentence in list:
-                steps.append(sentence)
-        
-        self.steps = steps
+        steps = [item.text for item in list]
+        self.steps = self.tokenize_sentences(steps)
         return True
         
         
@@ -143,21 +181,14 @@ class AddictionParser ():
         
         if self.parseTitle() == False:
             return False
-        
         if self.parseIngredients() == False:
             return False
-            
         if self.parseSteps() == False:
             return False
 
         # non essential fields below
         self.parseYield() # fills in with most common
-        
-        self.tags = self.parseTags(self.soup.find("div", {"id" : re.compile('^post-')}))
-        img = self.soup.find("img", {"class": "mv-create-image"})
-        if img != None and img.has_attr("description"):
-            self.description = img["description"]
-            
+        self.parseTags()
         return True
         
     #json
@@ -221,7 +252,7 @@ class AddictionSpider:
  
  
   def run (self):
-    for page in range(10, 21):
+    for page in range(1, 22):
         self.makeSoup(page)
         self.consumeSoup()
     self.parseAndWriteLinks()
