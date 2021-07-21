@@ -129,7 +129,7 @@ class FoodParser ():
         else:
             ingredients = [self.processText(item.text) for item in has_ingredients]
             ingredients.pop(0) # pop noise (deselect option)
-            self.ingredients = {"main": ingredients}
+            self.ingredients = [{"main": ingredients}]
         return True
 
 
@@ -207,8 +207,12 @@ class FoodParser ():
 class FoodSpider:
 
   # hosts all cupcake recipes on the site
-  directory = "https://www.foodnetwork.com/search/cupcakes-/p/";
-  query = "/CUSTOM_FACET:RECIPE_FACET"
+#  directory = "https://www.foodnetwork.com/search/cupcakes-/p/";
+#  query = "/CUSTOM_FACET:RECIPE_FACET"
+    
+  directory = "https://www.foodnetwork.com/search/cakes-/p/"
+  query = "/DISH_DFACET:0/tag%23dish:cake"
+
   links = [] # resulting list of links from scrape
   parser = FoodParser()
   
@@ -230,7 +234,7 @@ class FoodSpider:
       
   # keep copy of urls scraped
   def parseAndWriteLinks (self):
-    with open('cupcakes_with_frosting.csv', mode='a') as recipe_file:
+    with open('cakes.csv', mode='a') as recipe_file:
         writer = csv.writer(recipe_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for index in range(len(self.links)):
             # run parser on url
@@ -242,9 +246,10 @@ class FoodSpider:
     recipe_file.close()
     
  
- 
+ # 60 cupcakes
+ #179 cakes
   def run (self):
-    for page in range(40, 60):
+    for page in range(88, 180):
         self.makeSoup(page)
         self.consumeSoup()
     self.parseAndWriteLinks()

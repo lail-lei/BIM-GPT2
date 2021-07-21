@@ -202,7 +202,7 @@ class SallyParser ():
 class SallySpider:
 
   # hosts all cupcake recipes on the site
-  directory = "https://sallysbakingaddiction.com/category/desserts/cupcakes/page/";
+  directory = "https://sallysbakingaddiction.com/category/desserts/cakes/page/";
   
   links = [] # resulting list of links from scrape
   parser = SallyParser()
@@ -225,7 +225,7 @@ class SallySpider:
       
   # keep copy of urls scraped
   def parseAndWriteLinks (self):
-    with open('cupcakes.csv', mode='a') as recipe_file:
+    with open('cakes.csv', mode='a') as recipe_file:
         writer = csv.writer(recipe_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for index in range(len(self.links)):
             # run parser on url
@@ -239,7 +239,7 @@ class SallySpider:
  
  
   def run (self):
-    for page in range(2, 6):
+    for page in range(1, 10):
         self.makeSoup(page)
         self.consumeSoup()
     self.parseAndWriteLinks()
