@@ -158,7 +158,7 @@ class MadSpider:
 
   # hosts all cupcake recipes on the site
   directory = "https://www.bakingmad.com/search/recipes?page=";
-  query = "&query=cookies"
+  query = "&query=pie"
   
   links = [] # resulting list of links from scrape
   parser = MadParser()
@@ -186,7 +186,7 @@ class MadSpider:
 
   
   def parseAndWriteLinks (self):
-    with open('cookies.csv', mode='a') as recipe_file:
+    with open('pies.csv', mode='a') as recipe_file:
         writer = csv.writer(recipe_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for index in range(len(self.links)):
             if self.parser.run(self.links[index]) == True:
@@ -197,7 +197,7 @@ class MadSpider:
     recipe_file.close()
  
   def run (self):
-    for page in range(5, 10):
+    for page in range(6, 8):
         self.makeSoup(page)
     self.parseAndWriteLinks()
   

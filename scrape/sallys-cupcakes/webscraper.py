@@ -7,7 +7,7 @@ nltk.download('punkt')
 
 
 class SallyParser ():
-    
+    ingredients = []
     def _init_ (self):
         self.title = ""
         self.tags = []
@@ -15,7 +15,7 @@ class SallyParser ():
         self.serves = "12 cupcakes"
         self.soup = None
         self.url = None
-        self.ingredients = []
+   
     
     def makeSoup (self):
         # make request to disguise scraping
@@ -202,7 +202,8 @@ class SallyParser ():
 class SallySpider:
 
   # hosts all cupcake recipes on the site
-  directory = "https://sallysbakingaddiction.com/category/desserts/cookies/page/";
+ 
+  directory =  "https://sallysbakingaddiction.com/category/desserts/pies-crisps-tarts/page/"
   
   links = [] # resulting list of links from scrape
   parser = SallyParser()
@@ -213,7 +214,7 @@ class SallySpider:
   
   def makeSoup (self, page):
     # make request to disguise scraping
-    url = self.directory + str(page) + "/";
+    url = self.directory + str(page) + "/"
     req = Request(url, headers={'User-Agent': 'Mozilla/5.0'})
     webpage = urlopen(req).read()
     self.soup = BeautifulSoup(webpage, "html.parser")
@@ -225,7 +226,7 @@ class SallySpider:
       
   # keep copy of urls scraped
   def parseAndWriteLinks (self):
-    with open('cookies.csv', mode='a') as recipe_file:
+    with open('pies.csv', mode='a') as recipe_file:
         writer = csv.writer(recipe_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for index in range(len(self.links)):
             # run parser on url
@@ -239,7 +240,7 @@ class SallySpider:
  
  
   def run (self):
-    for page in range(1, 17):
+    for page in range(1, 7):
         self.makeSoup(page)
         self.consumeSoup()
     self.parseAndWriteLinks()
