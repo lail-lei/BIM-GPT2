@@ -7,14 +7,19 @@ nltk.download('punkt')
 
 
 class SallyParser ():
+    
+    yields = "12"
     ingredients = []
+    tags = []
+    steps = []
+    
     def _init_ (self):
         self.title = ""
-        self.tags = []
-        self.steps = []
-        self.serves = "12 cupcakes"
+        
+        
         self.soup = None
         self.url = None
+        
    
     
     def makeSoup (self):
@@ -36,9 +41,9 @@ class SallyParser ():
     def parseYield (self):
         serves = self.soup.find("span", {"class": "tasty-recipes-yield"})
         if serves:
-            self.serves = serves.text
+            self.yields = serves.text
         else:
-            self.serves = "12" #replace missing yield with common yield
+            self.yields = "12" #replace missing yield with common yield
         
     def processHeading (self, text):
         text = text.strip().lower()
@@ -93,7 +98,7 @@ class SallyParser ():
             return False;
             
         if len(body) == 1:
-            self.ingredients.append({"main" : body[0]})
+            self.ingredients = [{"main" : body[0]}]
             return True;
         
         # more than 1 subrecipe
@@ -184,7 +189,7 @@ class SallyParser ():
     def getJSON (self):
         json = {}
         json["title"] = self.title
-        json["yield"] = self.serves
+        json["yield"] = self.yields
         json["ingredients"] = self.ingredients
         json["steps"] = self.steps
         json["url"] = self.url
@@ -203,7 +208,7 @@ class SallySpider:
 
   # hosts all cupcake recipes on the site
  
-  directory =  "https://sallysbakingaddiction.com/category/desserts/pies-crisps-tarts/page/"
+  directory =  "https://sallysbakingaddiction.com/category/desserts/cookies/page/"
   
   links = [] # resulting list of links from scrape
   parser = SallyParser()
@@ -226,7 +231,7 @@ class SallySpider:
       
   # keep copy of urls scraped
   def parseAndWriteLinks (self):
-    with open('pies.csv', mode='a') as recipe_file:
+    with open('cookies.csv', mode='a') as recipe_file:
         writer = csv.writer(recipe_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for index in range(len(self.links)):
             # run parser on url
@@ -240,7 +245,7 @@ class SallySpider:
  
  
   def run (self):
-    for page in range(1, 7):
+    for page in range(1, 17):
         self.makeSoup(page)
         self.consumeSoup()
     self.parseAndWriteLinks()

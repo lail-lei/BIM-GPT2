@@ -216,7 +216,7 @@ class AddictionSpider:
   # hosts all cupcake recipes on the site
   directory = "https://www.mybakingaddiction.com/page/"
 #  search = "/?s=cupcakes"
-search = "/?s=cake"
+  search = "/?s=cookies"
   
   links = [] # resulting list of links from scrape
   parser = AddictionParser()
@@ -239,7 +239,7 @@ search = "/?s=cake"
       
   # keep copy of urls scraped
   def parseAndWriteLinks (self):
-    with open('cakes.csv', mode='a') as recipe_file:
+    with open('cookies.csv', mode='a') as recipe_file:
         writer = csv.writer(recipe_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for index in range(len(self.links)):
             # run parser on url
@@ -253,7 +253,7 @@ search = "/?s=cake"
  
  
   def run (self):
-    for page in range(1, 22):
+    for page in range(1, 20):
         self.makeSoup(page)
         self.consumeSoup()
     self.parseAndWriteLinks()

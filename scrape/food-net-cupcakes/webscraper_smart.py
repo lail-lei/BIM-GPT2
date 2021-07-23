@@ -213,11 +213,11 @@ class FoodSpider:
 #  directory = "https://www.foodnetwork.com/search/cakes-/p/"
 #  query = "/DISH_DFACET:0/tag%23dish:cake"
 
-#  directory = "https://www.foodnetwork.com/search/cookies-/p/"
-#  query = "/CUSTOM_FACET:RECIPE_FACET"
+  directory = "https://www.foodnetwork.com/search/cookies-/p/"
+  query = "/CUSTOM_FACET:RECIPE_FACET"
   
-  directory = "https://www.foodnetwork.com/search/pie-/p/"
-  query = "/CUSTOM_FACET:RECIPE_FACET/DISH_DFACET:0/tag%23dish:pie"
+#  directory = "https://www.foodnetwork.com/search/pie-/p/"
+#  query = "/CUSTOM_FACET:RECIPE_FACET/DISH_DFACET:0/tag%23dish:pie"
 
   links = [] # resulting list of links from scrape
   parser = FoodParser()
@@ -240,7 +240,7 @@ class FoodSpider:
       
   # keep copy of urls scraped
   def parseAndWriteLinks (self):
-    with open('pies.csv', mode='a') as recipe_file:
+    with open('cookies.csv', mode='a') as recipe_file:
         writer = csv.writer(recipe_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for index in range(len(self.links)):
             # run parser on url
@@ -255,7 +255,7 @@ class FoodSpider:
  # 60 cupcakes
  #179 cakes
   def run (self):
-    for page in range(69, 100):
+    for page in range(1, 70):
         self.makeSoup(page)
         self.consumeSoup()
     self.parseAndWriteLinks()

@@ -28,7 +28,10 @@ class MadParser ():
     def parseTitle (self):
         if self.soup.find("h1") == None:
             return False
-        self.title = self.soup.find("h1").text
+        text = self.soup.find("h1").text
+        text = re.sub(r'(?<=by)', '', text) #get rid of by lines
+        self.title = text
+        
         return True
     
     def processText (self, text):
@@ -186,7 +189,7 @@ class MadSpider:
 
   
   def parseAndWriteLinks (self):
-    with open('pies.csv', mode='a') as recipe_file:
+    with open('pastry.csv', mode='a') as recipe_file:
         writer = csv.writer(recipe_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         for index in range(len(self.links)):
             if self.parser.run(self.links[index]) == True:
@@ -197,7 +200,7 @@ class MadSpider:
     recipe_file.close()
  
   def run (self):
-    for page in range(6, 8):
+    for page in range(2, 10):
         self.makeSoup(page)
     self.parseAndWriteLinks()
   

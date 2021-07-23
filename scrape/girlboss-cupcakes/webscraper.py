@@ -8,11 +8,11 @@ nltk.download('punkt')
 
 class GirlBossParser ():
     
-    ingredients = []
+    
     def _init_ (self):
         self.title = ""
         self.tags = []
-        
+        self.ingredients = []
         self.steps = []
         self.serves = None
         self.soup = None
@@ -99,7 +99,7 @@ class GirlBossParser ():
             return False;
             
         if len(body) == 1:
-            self.ingredients.append({"main" : body[0]})
+            self.ingredients = [{"main" : body[0]}]
             return True;
         
         # more than 1 subrecipe
@@ -215,12 +215,10 @@ class GirlBossParser ():
 
 class GirlBossSpider:
 
-  # hosts all cupcake recipes on the site
-#  directory = "https://www.lifeloveandsugar.com/page/"
-#  search = "/?s=cupcakes"
+#  # hosts all cupcake recipes on the site
 
-  directory = "https://www.lifeloveandsugar.com/recipes/sweets-and-treats/cookies/page/"
-  search="/"
+  directory = "https://www.lifeloveandsugar.com/page/"
+  search="/?s=cookies"
   
   links = [] # resulting list of links from scrape
   parser = GirlBossParser()
@@ -258,7 +256,7 @@ class GirlBossSpider:
  
  
   def run (self):
-    for page in range(1, 7):
+    for page in range(1, 8):
         self.makeSoup(page)
         self.consumeSoup()
     self.parseAndWriteLinks()
